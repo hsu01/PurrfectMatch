@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { View, Text, Image, ScrollView, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { CommunityPostFirebase, getLikeStatusFirebase, toggleLikeFirebase, getCommentsFirebase, addCommentFirebase, CommentFirebase, deleteCommunityCommentFirebase, editCommunityCommentFirebase, getCommunityPostFirebase } from '../api/community';
 import { getCurrentUser, getUserProfileFirebase } from '../api/firebaseAuth';
 
@@ -43,6 +43,7 @@ export type DisplayComment = CommentFirebase & {
 
 export default function PostDetail() {
   const params = useLocalSearchParams();
+  const navigation = useNavigation();
   const [comment, setComment] = useState('');
   const [commentsList, setCommentsList] = useState<DisplayComment[]>([]);
   const [loadingPost, setLoadingPost] = useState<boolean>(true);
@@ -111,6 +112,14 @@ export default function PostDetail() {
 
     fetchAvatarAndStatus();
   }, [loadPost, post?.authorId, id]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: { backgroundColor: '#4b2e83' },
+      headerTintColor: '#f6f2e9',
+      headerTitleStyle: { fontWeight: '800', color: '#f6f2e9' },
+    });
+  }, [navigation]);
 
   const toggleLike = async () => {
     if (liking) return;
@@ -632,11 +641,12 @@ export default function PostDetail() {
 const styles = StyleSheet.create({
   outer_container: {
     flex: 1,
-    alignContent: "center"
+    alignContent: "center",
+    backgroundColor: '#f6f2e9',
   },
   container: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f6f2e9',
     minHeight: '100%'
   },
   user: {
@@ -645,26 +655,27 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 14,
     padding: 16,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    borderWidth: 1,            // adds border
-    borderColor: "#ddd",       // light gray border
+    shadowColor: "#4b2e83",
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    borderWidth: 1,
+    borderColor: "rgba(75,46,131,0.2)",
   },
 
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   profilePic: { width: 50, height: 50, borderRadius: 25 },
 
   time: {
-    color: '#666',
+    color: '#5a4b6b',
     marginTop: 4
   },
   meta: {
-    color: '#444',
+    color: '#4b2e83',
     marginTop: 8
   },
   image: {
@@ -678,15 +689,15 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 12,
     fontSize: 16,
-    color: '#222'
+    color: '#1f1533'
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: '#cbb89f',
+    borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#f9f6ee',
     marginBottom: 0,
     flex: 1,
     minHeight: 44,
@@ -706,8 +717,8 @@ const styles = StyleSheet.create({
   postButton: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
+    backgroundColor: '#4b2e83',
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
@@ -722,7 +733,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#e7ddc9',
   },
   commentAvatar: {
     width: 36,
@@ -752,7 +763,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#fff', // or semi-transparent like 'rgba(255,255,255,0.9)'
+    backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 9999, // ensure it sits on top

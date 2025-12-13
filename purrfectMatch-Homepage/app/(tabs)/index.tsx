@@ -1,11 +1,11 @@
 // CommunityScreen component for PurrfectMatch app
 
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Image as ExpoImage } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useWindowDimensions, KeyboardAvoidingView, Platform, ActivityIndicator, } from 'react-native';
-import { createCommunityPostFirebase, listCommunityPostsFirebase, toggleLikeFirebase, getLikeStatusFirebase, getCommentsFirebase } from '../../api/community';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useWindowDimensions, KeyboardAvoidingView, Platform, ActivityIndicator, RefreshControl, } from 'react-native';
+import { createCommunityPostFirebase, listCommunityPostsFirebase, toggleLikeFirebase, getLikeStatusFirebase } from '../../api/community';
 import CreateCommunityPost from '../CreateCommunityPost';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { app } from '../../config/firebase';
@@ -46,6 +46,7 @@ export default function CommunityScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [searchPetType, setSearchPetType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -121,10 +122,6 @@ export default function CommunityScreen() {
         const liked = currentUser ? await getLikeStatusFirebase(post.id, currentUser.uid) : false;
         // Fetch author profile to get avatar
         const profile = await getUserProfileFirebase(post.authorId);
-        // Fresh comment count from collection to avoid stale cached value
-        const comments = typeof getCommentsFirebase === 'function'
-          ? await getCommentsFirebase(post.id)
-          : [];
         
         return {
           id: index + 1,
@@ -138,7 +135,7 @@ export default function CommunityScreen() {
           description: post.description,
           image: post.imageUrl,
           likes: post.likes,
-          comments: Math.max(post.comments, comments.length),
+          comments: post.comments,
           liked,
         };
       }));
@@ -154,16 +151,19 @@ export default function CommunityScreen() {
     }
   }, []);
 
+  const hasLoaded = useRef(false);
+
   useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
     loadPosts();
   }, [loadPosts]);
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log('Screen focused, refreshing posts...');
-      loadPosts();
-    }, [loadPosts])
-  );
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadPosts();
+    setRefreshing(false);
+  }, [loadPosts]);
 
   const showAlert = (title: string, message: string) => {
     if (typeof window !== 'undefined' && window.alert) {
@@ -318,7 +318,7 @@ export default function CommunityScreen() {
     <View style={styles.container}>
       {!showForm && (
         <>
-          <Text style={styles.header}>Share, Ask, and Help Other Pet Owners!</Text>
+          <Text style={styles.header}>Paws, play, and share the love!</Text>
           {loadError && (
             <Text style={{ textAlign: 'center', marginTop: 8, color: 'red' }}>{loadError}</Text>
           )}
@@ -340,9 +340,15 @@ export default function CommunityScreen() {
             </View>
           </View>
 
-          <ScrollView style={styles.feed} contentContainerStyle={{ alignItems: 'center' }}>
+          <ScrollView
+            style={styles.feed}
+            contentContainerStyle={{ alignItems: 'center' }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4b2e83" />
+            }
+          >
             {filteredPosts.map(post => (
-              <View key={post.id} style={[styles.card, { width: cardWidth }]}>
+                <View key={post.id} style={[styles.card, { width: cardWidth }]}>
                 {/* Tap ANYWHERE in this top area to open details */}
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -352,7 +358,12 @@ export default function CommunityScreen() {
                 >
                   <View style={styles.cardHeader}>
                     <TouchableOpacity activeOpacity={0.8} onPress={goToProfile(post.authorId)}>
-                      <Image source={{ uri: post.avatar || 'https://media.istockphoto.com/id/1444657782/vector/dog-and-cat-profile-logo-design.jpg?s=612x612&w=0&k=20&c=86ln0k0egBt3EIaf2jnubn96BtMu6sXJEp4AvaP0FJ0=' }} style={styles.profilePic} />
+                      <ExpoImage
+                        source={{ uri: post.avatar || 'https://media.istockphoto.com/id/1444657782/vector/dog-and-cat-profile-logo-design.jpg?s=612x612&w=0&k=20&c=86ln0k0egBt3EIaf2jnubn96BtMu6sXJEp4AvaP0FJ0=' }}
+                        style={styles.profilePic}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                      />
                     </TouchableOpacity>
 
                     <View>
@@ -369,7 +380,12 @@ export default function CommunityScreen() {
                   </Text>
 
                   {post.image ? (
-                    <Image source={{ uri: post.image }} style={styles.cardImage} />
+                    <ExpoImage
+                      source={{ uri: post.image }}
+                      style={styles.cardImage}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                    />
                   ) : null}
                 </TouchableOpacity>
 
@@ -411,7 +427,7 @@ export default function CommunityScreen() {
                     <Text style={{ marginLeft: 8 }}>{post.comments}</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+                </View>
             ))}
           </ScrollView>
 
@@ -436,14 +452,16 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#f6f2e9'
   },
   header: {
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 40,
-    color: '#000'
+    color: '#4b2e83',
+    letterSpacing: 0.5,
+    textTransform: 'none'
   },
   searchContainer: {
     flexDirection: 'row',
@@ -470,14 +488,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    borderRadius: 14,
+    padding: 14,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#4b2e83',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(75, 46, 131, 0.45)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -514,7 +535,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 30,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#b7a57a',
     width: 60,
     height: 60,
     borderRadius: 30,

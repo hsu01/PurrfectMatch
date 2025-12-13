@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useFocusEffect } from "expo-router";
-import React, { useState } from 'react';
+import { useRouter } from "expo-router";
+import React, { useState, useRef, useEffect } from 'react';
+import { Image as ExpoImage } from 'expo-image';
 import {
   Alert,
   Image,
@@ -15,8 +16,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
-import {createPlaydateFirebase, listPlaydatesFirebase, toggleLikeFirebase, getLikeStatusFirebase, toggleJoinFirebase, getJoinStatusFirebase, getPlaydateCommentsFirebase } from "../../api/playdates";
+import {createPlaydateFirebase, listPlaydatesFirebase, toggleLikeFirebase, getLikeStatusFirebase, toggleJoinFirebase, getJoinStatusFirebase } from "../../api/playdates";
 import MapView, { Marker, Circle } from 'react-native-maps';
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -150,6 +152,7 @@ export default function PlaydateScreen() {
   const [selectedTime, setSelectedTime] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [refreshing, setRefreshing] = useState(false);
 
   const dynamicCardWidth = width > 900 ? 800 : width > 600 ? 550 : "100%";
 
@@ -610,7 +613,7 @@ export default function PlaydateScreen() {
     setLoading(true);
     setLoadError(null);
     try {
-      const firebasePosts = await listPlaydatesFirebase();
+      const firebasePosts = (await listPlaydatesFirebase()).slice(0, 25);
       const currentUser = getCurrentUser();
 
       const formattedPosts: CardPost[] = await Promise.all(
@@ -619,10 +622,6 @@ export default function PlaydateScreen() {
           const liked = currentUser ? await getLikeStatusFirebase(post.id, currentUser.uid) : false;
           const joined = currentUser ? await getJoinStatusFirebase(post.id, currentUser.uid) : false;
           const profile = await getUserProfileFirebase(post.authorId);
-          // Fresh comment count from collection to avoid stale cached value
-          const comments = typeof getPlaydateCommentsFirebase === 'function'
-            ? await getPlaydateCommentsFirebase(post.id)
-            : [];
           return {
             id: post.id,
             authorId: post.authorId,
@@ -636,7 +635,7 @@ export default function PlaydateScreen() {
             description: post.description,
             whenAt: post.whenAt,
             likes: post.likes ?? 0,
-            comments: Math.max(post.comments ?? 0, comments.length),
+            comments: post.comments ?? 0,
             participants: post.participants ?? 0,
             liked: liked,
             joined: joined,
@@ -657,12 +656,13 @@ export default function PlaydateScreen() {
     }
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log('Screen focused, refreshing playdates ...');
-      loadPlaydates();
-    }, [loadPlaydates])
-  );
+  const hasLoaded = useRef(false);
+
+  useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+    loadPlaydates();
+  }, [loadPlaydates]);
 
   const goToProfile = (authorId: string) => (e: any) => {
     e.stopPropagation();
@@ -708,6 +708,12 @@ export default function PlaydateScreen() {
           longitudeDelta: 0.05,
         }
     : undefined;
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await loadPlaydates();
+    setRefreshing(false);
+  }, [loadPlaydates]);
 
   function parseWhenAt(whenAt: string): Date {
     // Normalize all weird spaces to normal spaces
@@ -815,7 +821,7 @@ export default function PlaydateScreen() {
         {!showForm && (
           <>
             <Text style={styles.header}>
-              One Simple Post, One Fun Play Date!
+              Paws up for your next park party!
             </Text>
             {loadError && (
               <Text
@@ -886,6 +892,9 @@ export default function PlaydateScreen() {
             <ScrollView
               style={styles.feed}
               contentContainerStyle={{ alignItems: "center" }}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4b2e83" />
+              }
             >
               {filteredPosts.map((post) => (
                 <TouchableOpacity
@@ -897,13 +906,15 @@ export default function PlaydateScreen() {
                 >
                   <View style={styles.cardHeader}>
                     <TouchableOpacity activeOpacity={0.8} onPress={goToProfile(post.authorId)}>
-                      <Image
+                      <ExpoImage
                         source={{
                           uri:
                             post.avatar ||
                             "https://media.istockphoto.com/id/1444657782/vector/dog-and-cat-profile-logo-design.jpg?s=612x612&w=0&k=20&c=86ln0k0egBt3EIaf2jnubn96BtMu6sXJEp4AvaP0FJ0=",
                         }}
                         style={styles.profilePic}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                       />
                     </TouchableOpacity>
 
@@ -1011,9 +1022,12 @@ export default function PlaydateScreen() {
                   </Text>
 
                   {post.image ? (
-                    <Image
+                    <ExpoImage
                       source={{ uri: post.image }}
                       style={styles.cardImage}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                      transition={200}
                     />
                   ) : null}
 
@@ -1281,13 +1295,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     resizeMode: "cover",
   },
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#f6f2e9" },
   header: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: "800",
     textAlign: "center",
     marginTop: 40,
-    color: "#000",
+    color: "#4b2e83",
+    letterSpacing: 0.6,
   },
   searchContainer: {
     flexDirection: "row",
@@ -1297,21 +1312,28 @@ const styles = StyleSheet.create({
   searchBox: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#f9f6ee",
     alignItems: "center",
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingHorizontal: 8,
+    minHeight: 40,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#b7a57a",
   },
-  searchInput: { flex: 1, paddingVertical: 6 },
+  searchInput: { flex: 1, paddingVertical: 6, color: "#1f1533" },
   searchIcon: { padding: 6 },
   dropdown: {
-    backgroundColor: "#f2f2f2",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginTop: 5,
-    borderRadius: 8,
+    backgroundColor: "#f9f6ee",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginLeft: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#b7a57a",
+    minHeight: 40,
+    justifyContent: "center",
   },
-  dropdownText: { color: "#333" },
+  dropdownText: { color: "#4b2e83", fontWeight: "700" },
   modalBackground: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -1389,7 +1411,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#b7a57a",
     width: 60,
     height: 60,
     borderRadius: 30,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Image as ExpoImage } from 'expo-image';
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   PlaydatePostFirebase,
@@ -49,6 +50,7 @@ export function timeAgo(date: Date) {
 export default function PlaydatePost() {
   const params = useLocalSearchParams();
 
+  const navigation = useNavigation();
   const postId = params.id as string | undefined;
 
   const [comment, setComment] = useState("");
@@ -75,6 +77,14 @@ export default function PlaydatePost() {
   const [liking, setLiking] = useState<boolean>(false);
 
   const router = useRouter();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: { backgroundColor: '#4b2e83' },
+      headerTintColor: '#f6f2e9',
+      headerTitleStyle: { fontWeight: '800', color: '#f6f2e9' },
+    });
+  }, [navigation]);
 
   const loadPost = useCallback(async () => {
     if (!postId) return;
@@ -604,9 +614,11 @@ export default function PlaydatePost() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <TouchableOpacity onPress={() => router.push({ pathname: "/userProfile", params: { authorId: post?.authorId } })}>
-              <Image
+              <ExpoImage
                 source={{ uri: postAvatarUrl || 'https://media.istockphoto.com/id/1444657782/vector/dog-and-cat-profile-logo-design.jpg?s=612x612&w=0&k=20&c=86ln0k0egBt3EIaf2jnubn96BtMu6sXJEp4AvaP0FJ0=' }}
                 style={styles.profilePic}
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
@@ -640,12 +652,11 @@ export default function PlaydatePost() {
                   <TouchableOpacity
                     style={[
                       styles.joinButton,
-                      {
-                        backgroundColor: joined ? "#21bb61ff" : "#3498db",
-                        opacity: isBlocked ? 0.5 : 1,
-                      },
+                      joined && styles.joinButtonJoined,
+                      isCompleted && styles.joinButtonClosed,
+                      isBlocked && styles.joinButtonDisabled,
                     ]}
-                    activeOpacity={0.8}
+                    activeOpacity={0.9}
                     onPress={(e) => {
                       e.stopPropagation();
                       if (isBlocked) return;
@@ -724,7 +735,15 @@ export default function PlaydatePost() {
             )}
           </Text>
 
-          {post?.imageUrl && <Image source={{ uri: post.imageUrl }} style={styles.image} />}
+          {post?.imageUrl && (
+            <ExpoImage
+              source={{ uri: post.imageUrl }}
+              style={styles.image}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
+            />
+          )}
 
           {/* --- LOCATION / MAP --- */}
           <View style={{ marginTop: 12 }}>
@@ -1029,18 +1048,19 @@ export default function PlaydatePost() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: "#fff" },
+  container: { padding: 16, backgroundColor: "#f6f2e9" },
 
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 14,
     padding: 16,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: "#4b2e83",
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
     borderWidth: 1,            // adds border
-    borderColor: "#ddd",       // light gray border
+    borderColor: "rgba(75,46,131,0.2)",       // light gray border
   },
 
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
@@ -1048,10 +1068,10 @@ const styles = StyleSheet.create({
   profilePic: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
 
   username: { fontWeight: "600", fontSize: 15 },
-  time: { color: "#666", fontSize: 12 },
+  time: { color: "#5a4b6b", fontSize: 12 },
 
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 6 },
-  subtitle: { fontSize: 14, color: "#666", marginBottom: 4 },
+  subtitle: { fontSize: 14, color: "#4b2e83", marginBottom: 4 },
 
   image: {
     width: "100%",
@@ -1079,11 +1099,11 @@ const styles = StyleSheet.create({
 
   commentBubble: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
+    backgroundColor: "#f9f6ee",
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#ddd",
-    paddingHorizontal: 16,
+    borderColor: "#cbb89f",
+    paddingHorizontal: 14,
     paddingVertical: 10,
   },
 
@@ -1099,7 +1119,7 @@ const styles = StyleSheet.create({
   },
 
   postButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#4b2e83",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 12,
@@ -1115,7 +1135,7 @@ const styles = StyleSheet.create({
 
   commentUsername: { fontWeight: "600", fontSize: 14 },
   commentTime: { color: "#888", fontSize: 12 },
-  commentContent: { fontSize: 14, marginTop: 2, color: "#333" },
+  commentContent: { fontSize: 14, marginTop: 2, color: "#1f1533" },
 
   map: {
     width: "100%",
@@ -1129,7 +1149,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 10,
     bottom: 15,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "#4b2e83",
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -1138,9 +1158,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   mapBadgeText: {
-    color: "#fff",
+    color: "#f6f2e9",
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   postMenuButton: {
     position: 'absolute',
@@ -1160,31 +1180,51 @@ const styles = StyleSheet.create({
   modalOptionText: { fontSize: 16 },
 
   joinButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
     alignSelf: "center",
+    backgroundColor: "#4b2e83",
+    borderWidth: 1,
+    borderColor: "#b7a57a",
   },
 
   joinButtonText: {
-    color: "white",
-    fontWeight: "600",
-    fontSize: 13,
+    color: "#f6f2e9",
+    fontWeight: "800",
+    fontSize: 12,
+    letterSpacing: 0.2,
   },
 
-    participantsBadge: {
-    backgroundColor: "#FFE8D6",   // soft warm orange background
+  joinButtonJoined: {
+    backgroundColor: "#1f9a5b",
+    borderColor: "#0f6b3a",
+  },
+
+  joinButtonClosed: {
+    backgroundColor: "#a39e9e",
+    borderColor: "#7c7777",
+  },
+
+  joinButtonDisabled: {
+    opacity: 0.6,
+  },
+
+  participantsBadge: {
+    backgroundColor: "#ebe3d0",
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: 12,
     marginBottom: 6,
     alignSelf: "center",
+    borderWidth: 1,
+    borderColor: "#b7a57a",
   },
 
   participantsBadgeText: {
-    color: "#F97316",             // vibrant orange text
+    color: "#4b2e83",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 
   participantsModalOverlay: {
@@ -1255,28 +1295,31 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   whenAt: {
-  fontSize: 14,
-  color: "#666",
-  height: 24,
-  lineHeight: 24,
-},
+    fontSize: 14,
+    color: "#4b2e83",
+    height: 24,
+    lineHeight: 24,
+  },
 
-badge: {
-  height: 24,
-  paddingHorizontal: 6,
-  borderRadius: 10,
-  justifyContent: "center",
-  alignItems: "center",
-},
+  badge: {
+    height: 24,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ebe3d0",
+    borderWidth: 1,
+    borderColor: "#b7a57a",
+  },
 
-badgeUpcoming: { backgroundColor: "#2563EB" },
-badgeOngoing: { backgroundColor: "#16A34A" },
-badgeCompleted: { backgroundColor: "#6B7280" },
+  badgeUpcoming: { backgroundColor: "#e3d8ff", borderColor: "#4b2e83" },
+  badgeOngoing: { backgroundColor: "#d9f3e7", borderColor: "#1f9a5b" },
+  badgeCompleted: { backgroundColor: "#ece7dc", borderColor: "#a39e9e" },
 
-badgeText: {
-  color: "#fff",
-  fontSize: 12,
-  fontWeight: "600",
-}
+  badgeText: {
+    color: "#1f1533",
+    fontSize: 12,
+    fontWeight: "700",
+  }
 
 });

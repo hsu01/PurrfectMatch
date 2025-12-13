@@ -934,22 +934,27 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f4f7',
+    backgroundColor: '#f6f2e9',
   },
   login: {
-    backgroundColor: '#fff',
-    padding: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius:10,
-    margin: 16,
-    marginTop: 100,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    padding: 22,
+    shadowColor: "#4b2e83",
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    margin: 18,
+    marginTop: 80,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(75,46,131,0.2)',
   },
   title: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: '800',
     marginBottom: 12,
     textAlign: 'center',
+    color: '#4b2e83',
   },
   errorContainer: {
     backgroundColor: '#fee',
@@ -972,16 +977,17 @@ const styles = StyleSheet.create({
   input: {
     height: 44,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: '#cbb89f',
+    borderRadius: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#fafafa',
-    marginBottom: 10
+    backgroundColor: '#f9f6ee',
+    marginBottom: 10,
+    color: '#1f1533',
   },
   login_button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4b2e83',
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 30
@@ -1002,11 +1008,11 @@ const styles = StyleSheet.create({
   },
   // Profile page styles
   profileHeader: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.95)',
     padding: 24,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e7ddc9',
   },
   avatarContainer: {
     marginBottom: 16,
@@ -1016,7 +1022,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#007AFF',
+    borderColor: '#4b2e83',
   },
   username: {
     fontSize: 24,
@@ -1042,7 +1048,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#007AFF',
+    color: '#4b2e83',
   },
   statLabel: {
     fontSize: 12,
@@ -1055,10 +1061,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   logoutButton: {
-    backgroundColor: '#ff3b30',
+    backgroundColor: '#b7a57a',
     paddingVertical: 12,
     paddingHorizontal: 40,
-    borderRadius: 8,
+    borderRadius: 10,
     marginTop: 8,
   },
   logoutButtonText: {
@@ -1072,7 +1078,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
+    color: '#4b2e83',
     marginBottom: 16,
   },
   emptyState: {
@@ -1099,15 +1105,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   postCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 14,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#4b2e83',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(75,46,131,0.2)',
   },
   postHeader: {
     flexDirection: 'row',
@@ -1116,14 +1124,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   postBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#ebe3d0',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   postBadgeText: {
     fontSize: 12,
-    color: '#007AFF',
+    color: '#4b2e83',
     fontWeight: '600',
   },
   postDescription: {
@@ -1144,7 +1152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#e7ddc9',
   },
   postStats: {
     fontSize: 12,
@@ -1168,11 +1176,11 @@ const styles = StyleSheet.create({
   },
   playdateLabel: {
     fontSize: 13,
-    color: '#007AFF',
+    color: '#4b2e83',
     fontWeight: '500',
   },
   playdateDetails: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#f9f6ee',
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
@@ -1207,21 +1215,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4b2e83',
     padding: 6,
     borderRadius: 20,
   },
   profileInfoBox: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.92)',
     padding: 20,
     marginHorizontal: 16,
     marginTop: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    borderRadius: 14,
+    shadowColor: '#4b2e83',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(75,46,131,0.2)',
   },
 
   infoRow: {
@@ -1249,15 +1259,15 @@ const styles = StyleSheet.create({
 
   editButton: {
     alignSelf: "flex-end",
-    backgroundColor: "#007AFF",
+    backgroundColor: "#4b2e83",
     paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 8,
+    borderRadius: 10,
     marginBottom: 12,
   },
   editButtonText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: "#f6f2e9",
+    fontWeight: "700",
   },
 
   inputField: {
