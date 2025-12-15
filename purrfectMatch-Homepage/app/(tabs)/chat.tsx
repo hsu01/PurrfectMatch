@@ -57,8 +57,8 @@ export default function ChatScreen() {
     const me = getCurrentUser()?.uid === item.userId;
     return (
       <View style={[styles.msgContainer, me ? styles.msgMe : styles.msgOther]}>
-        <Text style={styles.msgAuthor}>{item.username}</Text>
-        <Text style={styles.msgText}>{item.text}</Text>
+        <Text style={me ? styles.msgAuthor : styles.msgAuthorOther}>{item.username}</Text>
+        <Text style={me ? styles.msgText : styles.msgTextOther}>{item.text}</Text>
       </View>
     );
   };
@@ -143,6 +143,8 @@ const styles = StyleSheet.create({
   msgOther: { backgroundColor: "#ebe3d0", alignSelf: "flex-start" },
   msgAuthor: { fontWeight: "700", color: "#f6f2e9" },
   msgText: { color: "#fff" },
+  msgAuthorOther: { color: "#4b2e83", fontWeight: "700" },
+  msgTextOther: { color: "#1f1533" },
   banner: {
     padding: 12,
     backgroundColor: "#ebe3d0",

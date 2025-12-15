@@ -213,59 +213,59 @@ export default function PlacesScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
-        <View style={styles.mapWrapper}>
-          <MapView
-            style={StyleSheet.absoluteFill}
-            initialRegion={defaultRegion}
-            showsUserLocation
-            onRegionChangeComplete={(region) => setMapRegion(region)}
-          >
-            {filtered.map((p) => (
-              <Marker
-                key={p.id}
-                coordinate={{ latitude: p.lat, longitude: p.lng }}
-                title={p.name}
-                description={p.type}
-                pinColor={PLACE_TYPES.find((t) => t.value === p.type)?.color || "#4b2e83"}
-              />
-            ))}
-          </MapView>
-        </View>
-
-        <View style={styles.filterRow}>
-          {PLACE_TYPES.map((t) => (
-            <TouchableOpacity
-              key={t.value}
-              style={[
-                styles.filterChip,
-                filterType === t.value && { backgroundColor: t.color, borderColor: t.color },
-              ]}
-              onPress={() => setFilterType(filterType === t.value ? "all" : t.value)}
-            >
-              <Ionicons
-                name={
-                  t.value === "park"
-                    ? "leaf"
-                    : t.value === "cafe"
-                    ? "cafe"
-                    : t.value === "trail"
-                    ? "walk"
-                    : "paw"
-                }
-                size={16}
-                color={filterType === t.value ? "#f6f2e9" : "#4b2e83"}
-              />
-              <Text style={[styles.filterText, filterType === t.value && { color: "#f6f2e9" }]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {loadError ? <Text style={styles.errorText}>{loadError}</Text> : null}
-
         <ScrollView
           style={{ flex: 1 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4b2e83" />}
         >
+          <View style={styles.mapWrapper}>
+            <MapView
+              style={StyleSheet.absoluteFill}
+              initialRegion={defaultRegion}
+              showsUserLocation
+              onRegionChangeComplete={(region) => setMapRegion(region)}
+            >
+              {filtered.map((p) => (
+                <Marker
+                  key={p.id}
+                  coordinate={{ latitude: p.lat, longitude: p.lng }}
+                  title={p.name}
+                  description={p.type}
+                  pinColor={PLACE_TYPES.find((t) => t.value === p.type)?.color || "#4b2e83"}
+                />
+              ))}
+            </MapView>
+          </View>
+
+          <View style={styles.filterRow}>
+            {PLACE_TYPES.map((t) => (
+              <TouchableOpacity
+                key={t.value}
+                style={[
+                  styles.filterChip,
+                  filterType === t.value && { backgroundColor: t.color, borderColor: t.color },
+                ]}
+                onPress={() => setFilterType(filterType === t.value ? "all" : t.value)}
+              >
+                <Ionicons
+                  name={
+                    t.value === "park"
+                      ? "leaf"
+                      : t.value === "cafe"
+                      ? "cafe"
+                      : t.value === "trail"
+                      ? "walk"
+                      : "paw"
+                  }
+                  size={16}
+                  color={filterType === t.value ? "#f6f2e9" : "#4b2e83"}
+                />
+                <Text style={[styles.filterText, filterType === t.value && { color: "#f6f2e9" }]}>{t.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {loadError ? <Text style={styles.errorText}>{loadError}</Text> : null}
+
           {loading && places.length === 0 ? (
             <View style={{ padding: 20, alignItems: "center" }}>
               <ActivityIndicator color="#4b2e83" />
@@ -300,8 +300,6 @@ export default function PlacesScreen() {
           ) : null}
         </ScrollView>
       </View>
-
-
     </KeyboardAvoidingView>
   );
 }

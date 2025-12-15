@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native'
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import { signupFirebase } from "../api/firebaseAuth";
 
 export default function SignUp() {
@@ -59,79 +59,90 @@ export default function SignUp() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.signUp}>
-        <Text style={styles.title}>Sign Up</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.signUp}>
+          <Text style={styles.title}>Sign Up</Text>
 
-        <Text style={styles.account_create}>Enter your email</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+          <Text style={styles.account_create}>Enter your email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            returnKeyType="next"
+          />
 
-        <Text style={styles.account_create}>Enter your username</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
+          <Text style={styles.account_create}>Enter your username</Text>
+          <TextInput
+            style={styles.input}
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            returnKeyType="next"
+          />
 
-        <Text style={styles.account_create}>Enter your password</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={(text) => {
-            setPassword(text);
-            setPasswordError('');
-          }}
-          autoCapitalize="none"
-          secureTextEntry
-        />
+          <Text style={styles.account_create}>Enter your password</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              setPasswordError('');
+            }}
+            autoCapitalize="none"
+            secureTextEntry
+            returnKeyType="next"
+          />
 
-        <Text style={styles.account_create}>Re-enter your password</Text>
-        <TextInput
-          style={[
-            styles.input,
-            passwordError && { borderColor: 'red' } // ✅ RED BORDER ON ERROR
-          ]}
-          value={confirmPassword}
-          onChangeText={(text) => {
-            setConfirmPassword(text);
-            setPasswordError('');
-          }}
-          autoCapitalize="none"
-          secureTextEntry
-        />
+          <Text style={styles.account_create}>Re-enter your password</Text>
+          <TextInput
+            style={[
+              styles.input,
+              passwordError && { borderColor: 'red' } // ✅ RED BORDER ON ERROR
+            ]}
+            value={confirmPassword}
+            onChangeText={(text) => {
+              setConfirmPassword(text);
+              setPasswordError('');
+            }}
+            autoCapitalize="none"
+            secureTextEntry
+            returnKeyType="done"
+          />
 
-        {/* ✅ RED ERROR TEXT */}
-        {passwordError ? (
-          <Text style={styles.errorText}>{passwordError}</Text>
-        ) : null}
+          {/* ✅ RED ERROR TEXT */}
+          {passwordError ? (
+            <Text style={styles.errorText}>{passwordError}</Text>
+          ) : null}
 
-        <TouchableOpacity
-          style={[styles.button, loading && { backgroundColor: "#aaa" }]}
-          onPress={handleSignUp}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Signing Up..." : "Register"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <TouchableOpacity
+            style={[styles.button, loading && { backgroundColor: "#aaa" }]}
+            onPress={handleSignUp}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Signing Up..." : "Register"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#f2f4f7',
     padding: 16,
     justifyContent: 'center',
+    paddingBottom: 40,
   },
   signUp: {
     backgroundColor: '#fff',

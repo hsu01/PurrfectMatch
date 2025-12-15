@@ -17,9 +17,11 @@ export default {
         backgroundColor: "#ffffff"
       },
       ios: {
+        bundleIdentifier: "com.hsu01.purrfectmatch",
         supportsTablet: true
       },
       android: {
+        package: "com.hsu01.purrfectmatch",
         adaptiveIcon: {
           backgroundColor: "#E6F4FE",
           foregroundImage: "./assets/images/android-icon-foreground.png",
@@ -54,6 +56,9 @@ export default {
         firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
         firebaseAppId: process.env.FIREBASE_APP_ID,
+        eas: {
+          projectId: "de4f7268-a4b9-41f3-8e58-ef10f092d61d",
+        },
       }
     }
   };
